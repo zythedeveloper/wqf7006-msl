@@ -1,4 +1,4 @@
-import os, torch, warnings
+import os, warnings
 import streamlit as st
 import numpy as np
 from directory import weight_dir
