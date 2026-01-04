@@ -26,7 +26,7 @@ class CustomLSTM(nn.Module):
         x = torch.relu(self.fc5(x))
         x = self.output_layer(x)
         return x
-    
+
 
 @st.cache_resource
 def load_model(device, weight_dir):
