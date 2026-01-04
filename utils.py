@@ -96,7 +96,6 @@ def generate_subtitle_from_video(_cap, device, model):
 
     fps = cap.get(cv2.CAP_PROP_FPS) or 30
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    # print(f"Total frames: {frame_count}")
 
     sequence, predictions = [], []
     frame_count, start_frame = 0, 0
@@ -124,8 +123,6 @@ def generate_subtitle_from_video(_cap, device, model):
                 max_val, max_idx = torch.max(probabilities, dim=1)
                 predicted_label = model.gestures[max_idx.item()]
                 confidence = float(max_val.item())
-
-                # print(f"frames: {len(sequence)}, Prediction: {predicted_label} ({confidence:.2f})")
 
                 # threshold logic
                 detected_label = predicted_label if confidence > 0.9 else None
