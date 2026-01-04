@@ -5,6 +5,8 @@ import streamlit as st
 class CustomLSTM(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes):
         super(CustomLSTM, self).__init__()
+        self.gestures = st.session_state.gestures
+
         self.lstm1 = nn.LSTM(input_size, hidden_size, batch_first=True)
         self.lstm2 = nn.LSTM(hidden_size, hidden_size, batch_first=True)
         self.lstm3 = nn.LSTM(hidden_size, hidden_size, batch_first=True)

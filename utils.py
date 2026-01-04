@@ -77,30 +77,26 @@ def create_vtt(predictions, vtt_path):
 
 
 
-# generate video with landmark and subtitle
-def generate_video_and_subtitle(selected_video, device, model):
-    sequence = []
+@st.cache_data(show_spinner="Generating subtitles...")
+def cached_subtitle_generation(_video_obj, _device, _model): 
+    return generate_subtitle_from_video(_video_obj, device=_device, model=_model)
 
-    # temporary file for OpenCV to read the upload
-    tfile = tempfile.NamedTemporaryFile(delete=False)
-    tfile.write(selected_video.read())
+
+@st.cache_data(show_spinner="Processing video landmarks...")
+def cached_video_processing(_video_obj):
+    return generate_video_with_landmark(_video_obj)
+
+
+# generate subtitle from video
+def generate_subtitle_from_video(_cap, device, model):
+    sequence = []
     
     # open video with OpenCV
-    cap = cv2.VideoCapture(tfile.name)
-    tfile.close()
+    cap = cv2.VideoCapture(_cap)
 
     fps = cap.get(cv2.CAP_PROP_FPS) or 30
-    width = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) // 2) * 2
-    height = (int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) // 2) * 2
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     # print(f"Total frames: {frame_count}")
-
-    output_memory_file = io.BytesIO()
-    output_container = av.open(output_memory_file, 'w', format="mp4")
-    stream = output_container.add_stream('h264', rate=int(fps))
-    stream.width = width
-    stream.height = height
-    stream.pix_fmt = 'yuv420p'
 
     sequence, predictions = [], []
     frame_count, start_frame = 0, 0
@@ -112,17 +108,7 @@ def generate_video_and_subtitle(selected_video, device, model):
         if not ret:
             break
 
-        image, results = mediapipe_detection(frame, holistic)
-
-        # write the frame with landmarks to the output video
-        draw_styled_landmarks(image, results)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        av_frame = av.VideoFrame.from_ndarray(image, format='rgb24')
-
-        # encode and mux
-        for packet in stream.encode(av_frame):
-            output_container.mux(packet)
-
+        _, results = mediapipe_detection(frame, holistic)
         keypoints = extract_keypoints(results)
         sequence.append(keypoints)
         sequence = sequence[-30:]
@@ -136,7 +122,7 @@ def generate_video_and_subtitle(selected_video, device, model):
                 res = model(input_data)
                 probabilities = torch.softmax(res, dim=1)
                 max_val, max_idx = torch.max(probabilities, dim=1)
-                predicted_label = st.session_state.gestures[max_idx.item()]
+                predicted_label = model.gestures[max_idx.item()]
                 confidence = float(max_val.item())
 
                 # print(f"frames: {len(sequence)}, Prediction: {predicted_label} ({confidence:.2f})")
@@ -159,6 +145,44 @@ def generate_video_and_subtitle(selected_video, device, model):
     # if current_gesture is not None:
     #     predictions.append((start_frame/fps, frame_count/fps, current_gesture))
 
+    return predictions
+
+
+# generate video with landmark
+def generate_video_with_landmark(_cap):
+    # open video with OpenCV
+    cap = cv2.VideoCapture(_cap)
+    
+    fps = cap.get(cv2.CAP_PROP_FPS) or 30
+    width = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) // 2) * 2
+    height = (int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) // 2) * 2
+
+    output_memory_file = io.BytesIO()
+    output_container = av.open(output_memory_file, 'w', format="mp4")
+    stream = output_container.add_stream('h264', rate=int(fps))
+    stream.width = width
+    stream.height = height
+    stream.pix_fmt = 'yuv420p'
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+
+        if not ret:
+            break
+
+        image, results = mediapipe_detection(frame, holistic)
+
+        # write the frame with landmarks to the output video
+        draw_styled_landmarks(image, results)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # create frame
+        av_frame = av.VideoFrame.from_ndarray(image, format='rgb24')
+
+        # encode and mux
+        for packet in stream.encode(av_frame):
+            output_container.mux(packet)
+
     # flush the encoder
     for packet in stream.encode(None):
         output_container.mux(packet)
@@ -167,9 +191,4 @@ def generate_video_and_subtitle(selected_video, device, model):
 
     # reset pointer to start of the file
     output_memory_file.seek(0)
-
-    # create the subtitle file
-    vtt_file = tempfile.NamedTemporaryFile(delete=False, suffix=".vtt")
-    create_vtt(predictions, vtt_file.name)
-
-    return output_memory_file, vtt_file
+    return output_memory_file
