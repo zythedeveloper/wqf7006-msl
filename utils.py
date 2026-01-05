@@ -237,7 +237,6 @@ class VideoProcessor:
                 text_x = (width // 2) - (text_width // 2)
                 text_y = height - 50
                 cv2.putText(image, f'{self.detected_label}', (text_x, text_y), font, 1, (0, 255, 0), 2, cv2.LINE_AA)
-                self.detected_label = ""
             
             return av.VideoFrame.from_ndarray(image, format="bgr24")
         
