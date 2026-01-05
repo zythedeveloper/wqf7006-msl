@@ -12,7 +12,7 @@ warnings.filterwarnings("ignore")
 
 st.set_page_config(
     page_title="IsyaratAI",
-    layout="wide",
+    layout="centered",
     initial_sidebar_state="collapsed"
 )
 
