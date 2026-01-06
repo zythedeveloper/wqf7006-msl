@@ -37,3 +37,23 @@ uv run jupyter lab  # uv run jupyter notebook
 ```
 
 Or use any IDE/text editor :)
+
+## Dataset
+
+```bash
+uv run msl-extract-feats \ 
+    --video-root "data/BIM Dataset V3/video" \
+    --output-root "data/BIM Dataset V3/features" \ 
+    --sampling first \
+    --num-frames 30 \
+    --num-workers 4 \
+    --gloss hi beli pukul nasi_lemak lemak kereta nasi marah anak_lelaki baik jangan apa_khabar main pinjam buat ribut pandai_2 emak_saudara jahat panas assalamualaikum lelaki bomba emak sejuk masalah beli_2 panas_2 perempuan bagaimana
+
+uv run msl-extract-feats \ 
+    --video-root "data/BIM Dataset V3/video" \
+    --output-root "data/BIM Dataset V3/features" \ 
+    --sampling uniform \
+    --num-frames 30 \
+    --num-workers 4 \
+    --gloss hi beli pukul nasi_lemak lemak kereta nasi marah anak_lelaki baik jangan apa_khabar main pinjam buat ribut pandai_2 emak_saudara jahat panas assalamualaikum lelaki bomba emak sejuk masalah beli_2 panas_2 perempuan bagaimana
+```
