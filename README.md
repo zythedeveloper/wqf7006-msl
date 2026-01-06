@@ -56,4 +56,21 @@ uv run msl-extract-feats \
     --num-frames 30 \
     --num-workers 4 \
     --gloss hi beli pukul nasi_lemak lemak kereta nasi marah anak_lelaki baik jangan apa_khabar main pinjam buat ribut pandai_2 emak_saudara jahat panas assalamualaikum lelaki bomba emak sejuk masalah beli_2 panas_2 perempuan bagaimana
+
+uv run msl-build-tensors \
+    --features-root "data/BIM Dataset V3/features/first_30/" \
+    --output-root "/data/BIM Dataset V3/tensors/first_30" \
+    --num-frames 30 \
+    --split \
+    --test-size 0.1 \
+    --seed 42
+
+uv run msl-build-tensors \
+    --features-root "data/BIM Dataset V3/features/uniform_30/" \
+    --output-root "/data/BIM Dataset V3/tensors/uniform_30" \
+    --num-frames 30 \
+    --split \
+    --test-size 0.1 \
+    --seed 42
+
 ```
