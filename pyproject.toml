@@ -8,7 +8,7 @@ requires-python = ">=3.12"
 dependencies = [
     "av>=16.0.1",
     "matplotlib>=3.10.8",
-    "mediapipe>=0.10.21",
+    "mediapipe==0.10.21",
     "numpy>=2.3.5",
     "opencv-python>=4.11.0.86",
     "opencv-python-headless>=4.12.0.88",
@@ -34,6 +34,7 @@ cu130 = ["torch>=2.9.0", "torchvision>=0.24.0"]
 [project.scripts]
 msl = "wqf7006_msl:main"
 msl-extract-feats = "wqf7006_msl.scripts.extract_features:main"
+msl-build-tensors = "wqf7006_msl.scripts.build_tensors:main"
 
 [build-system]
 requires = ["uv_build>=0.9.8,<0.10.0"]

@@ -16,7 +16,7 @@ wqf7006-msl/
         │   └── ambil/
         │
         ├── features/ (we only save top 30 glosses with most videos)
-        │   ├── first30/ (first 30 frames of each video)
+        │   ├── first_30/ (first 30 frames of each video)
         │   │   ├── abang/
         │   │   │   ├── abang_1_1_1.mp4/
         │   │   │   │   ├── 00.npy (288-dim landmark features)
@@ -27,7 +27,7 @@ wqf7006-msl/
         │   │   ├── ...
         │   │   └── ambil/
         │   │
-        │   └── uniform30/ (uniformly sampled 30 frames from each video)
+        │   └── uniform_30/ (uniformly sampled 30 frames from each video)
         │       ├── abang/
         │       │   ├── abang_1_1_1.mp4/
         │       │   │   ├── 00.npy
@@ -38,19 +38,21 @@ wqf7006-msl/
         │       └── ambil/
         │
         └── tensors/
-            ├── first30/
+            ├── first_30/
             │   ├── X.npy
             │   ├── y.npy
             │   ├── X_train.npy
             │   ├── y_train.npy
             │   ├── X_test.npy
-            │   └── y_test.npy
+            │   ├── y_test.npy
+            │   └── label_map.json
             │
-            └── uniform30/
+            └── uniform_30/
                 ├── X.npy
                 ├── y.npy
                 ├── X_train.npy
                 ├── y_train.npy
                 ├── X_test.npy
-                └── y_test.npy
+                ├── y_test.npy
+                └── label_map.json
 ```
