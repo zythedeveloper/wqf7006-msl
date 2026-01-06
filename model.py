@@ -1,10 +1,13 @@
-import torch, os
+import os
+
+import torch
 import torch.nn as nn
 import streamlit as st
 
-class CustomLSTM(nn.Module):
+
+class BaselineLSTM(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes):
-        super(CustomLSTM, self).__init__()
+        super(BaselineLSTM, self).__init__()
         self.gestures = st.session_state.gestures
 
         self.lstm1 = nn.LSTM(input_size, hidden_size, batch_first=True)
@@ -30,12 +33,95 @@ class CustomLSTM(nn.Module):
         return x
 
 
+class TemporalAttention(nn.Module):
+    def __init__(self, hidden_dim):
+        super().__init__()
+        self.attn = nn.Linear(hidden_dim, 1)
+
+    def forward(self, x):
+        # x: (B, T, H)
+        weights = torch.softmax(self.attn(x), dim=1)
+        return (weights * x).sum(dim=1)
+
+
+class BiLSTMWithAttention(nn.Module):
+    def __init__(self, input_size, hidden_size, num_classes):
+        super().__init__()
+        self.gestures = st.session_state.gestures
+        
+        self.lstm = nn.LSTM(
+            input_size,
+            hidden_size,
+            num_layers=2,
+            batch_first=True,
+            bidirectional=True,
+            dropout=0.3,
+        )
+        self.attn = TemporalAttention(hidden_size * 2)
+        self.fc = nn.Sequential(
+            nn.Linear(hidden_size * 2, 128),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(128, num_classes),
+        )
+
+    def forward(self, x):
+        x, _ = self.lstm(x)
+        x = self.attn(x)
+        return self.fc(x)
+
+
+class TransformerModel(nn.Module):
+    def __init__(self, input_size, num_classes, d_model=128, nhead=4, num_layers=2):
+        super().__init__()
+        self.gestures = st.session_state.gestures
+
+        self.input_proj = nn.Linear(input_size, d_model)
+
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=d_model,
+            nhead=nhead,
+            dim_feedforward=256,
+            dropout=0.1,
+            batch_first=True,
+        )
+        self.encoder = nn.TransformerEncoder(encoder_layer, num_layers)
+        self.fc = nn.Linear(d_model, num_classes)
+
+    def forward(self, x):
+        x = self.input_proj(x)
+        x = self.encoder(x)
+        x = x.mean(dim=1)  # global average pooling
+        return self.fc(x)
+
+
 @st.cache_resource
-def load_model(device, weight_dir):
+def load_model(device, weight_dir, model_type="baseline"):
+    """
+    Load a model from checkpoint.
+    
+    Parameters:
+    -----------
+    device : torch.device
+        Device to load model on
+    weight_dir : str
+        Path to weight file
+    model_type : str
+        Type of model: "baseline", "bilstm", or "transformer"
+    """
     input_size = 258
     hidden_size = 64
     num_classes = 30
-    model = CustomLSTM(input_size, hidden_size, num_classes)
+    
+    # Create model based on type
+    if model_type == "baseline":
+        model = BaselineLSTM(input_size, hidden_size, num_classes)
+    elif model_type == "bilstm":
+        model = BiLSTMWithAttention(input_size, hidden_size, num_classes)
+    elif model_type == "transformer":
+        model = TransformerModel(input_size, num_classes)
+    else:
+        raise ValueError(f"Unknown model_type: {model_type}. Must be 'baseline', 'bilstm', or 'transformer'")
 
     # load weights into model
     if os.path.exists(weight_dir):

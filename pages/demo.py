@@ -20,17 +20,63 @@ st.title('DEMO.')
 
 if "gestures" not in st.session_state:
     st.session_state.gestures = [
-        'anak_lelaki', 'anak_perempuan', 'apa_khabar', 'assalamualaikum', 'baik',
+        'anak_lelaki', 'apa_khabar', 'assalamualaikum', 'bagaimana', 'baik',
         'beli', 'beli_2', 'bomba', 'buat', 'emak', 'emak_saudara', 'hi', 'jahat',
         'jangan', 'kereta', 'lelaki', 'lemak', 'main', 'marah', 'masalah', 'nasi',
         'nasi_lemak', 'panas', 'panas_2', 'pandai_2', 'perempuan', 'pinjam', 'pukul',
         'ribut', 'sejuk'
     ]
+# {
+#   "anak_lelaki": 0,
+#   "apa_khabar": 1,
+#   "assalamualaikum": 2,
+#   "bagaimana": 3,
+#   "baik": 4,
+#   "beli": 5,
+#   "beli_2": 6,
+#   "bomba": 7,
+#   "buat": 8,
+#   "emak": 9,
+#   "emak_saudara": 10,
+#   "hi": 11,
+#   "jahat": 12,
+#   "jangan": 13,
+#   "kereta": 14,
+#   "lelaki": 15,
+#   "lemak": 16,
+#   "main": 17,
+#   "marah": 18,
+#   "masalah": 19,
+#   "nasi": 20,
+#   "nasi_lemak": 21,
+#   "panas": 22,
+#   "panas_2": 23,
+#   "pandai_2": 24,
+#   "perempuan": 25,
+#   "pinjam": 26,
+#   "pukul": 27,
+#   "ribut": 28,
+#   "sejuk": 29
 
 
-weight_file = os.path.join(weight_dir, 'trained_model.pth')
+# Model selection
+model_options = {
+    "Baseline LSTM": ("baseline", "baselinelstm_best.pth"),
+    "BiLSTM with Attention": ("bilstm", "bilstmwithattention_best.pth"),
+    "Transformer": ("transformer", "transformermodel_best.pth"),
+}
+
+selected_model_name = st.sidebar.selectbox(
+    "Select Model",
+    options=list(model_options.keys()),
+    index=0,
+    help="Choose which model architecture to use for sign language recognition"
+)
+
+model_type, weight_filename = model_options[selected_model_name]
+weight_file = os.path.join(weight_dir, weight_filename)
 device = get_device()
-model = load_model(device, weight_file)
+model = load_model(device, weight_file, model_type=model_type)
 
 # user interface setup
 tab1, tab2 = st.tabs(["Upload", "Camera"])
