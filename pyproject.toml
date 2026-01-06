@@ -4,17 +4,17 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "hongjiaherng", email = "jiaherng2001@gmail.com" }]
-requires-python = ">=3.12"
+requires-python = "3.12.12"
 dependencies = [
+    "torch",
+    "torchvision",
     "av>=16.0.1",
     "matplotlib>=3.10.8",
     "mediapipe==0.10.21",
-    "numpy>=2.3.5",
-    "opencv-python>=4.11.0.86",
-    "opencv-python-headless>=4.12.0.88",
+    "numpy<2",
+    "opencv-python-headless==4.10.0.84",
     "pandas>=2.3.3",
     "scikit-learn>=1.8.0",
-    "seaborn>=0.13.2",
     "streamlit>=1.52.2",
     "streamlit-webrtc>=0.64.5",
     "tqdm>=4.67.1",
@@ -47,12 +47,14 @@ conflicts = [[{ extra = "cpu" }, { extra = "cu130" }]]
 
 [tool.uv.sources]
 torch = [
-    { index = "pytorch-cpu", extra = "cpu" },
-    { index = "pytorch-cu130", extra = "cu130" },
+    # Use CPU version on Linux (Streamlit Cloud) and macOS
+    { index = "pytorch-cpu", marker = "sys_platform == 'linux' or sys_platform == 'darwin'" },
+    # Use CUDA version on Windows (or other systems if you have local GPU)
+    { index = "pytorch-cu130", marker = "sys_platform == 'win32'" },
 ]
 torchvision = [
-    { index = "pytorch-cpu", extra = "cpu" },
-    { index = "pytorch-cu130", extra = "cu130" },
+    { index = "pytorch-cpu", marker = "sys_platform == 'linux' or sys_platform == 'darwin'" },
+    { index = "pytorch-cu130", marker = "sys_platform == 'win32'" },
 ]
 
 [[tool.uv.index]]
