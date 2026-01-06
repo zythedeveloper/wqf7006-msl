@@ -17,4 +17,5 @@ data/**/*DS_DIR_HDR
 .env
 weights/*
 !weights/.gitkeep
+!weights/*_best.pth
 label_map.json
