@@ -20,10 +20,11 @@ st.title('DEMO.')
 
 if "gestures" not in st.session_state:
     st.session_state.gestures = [
-        'hi', 'beli', 'pukul', 'nasi_lemak', 'lemak', 'kereta', 'nasi', 'marah', 'anak_lelaki', 'baik',
-        'jangan', 'apa_khabar', 'main', 'pinjam', 'buat', 'ribut', 'pandai_2', 'emak_saudara', 'jahat',
-        'panas', 'assalamualaikum', 'lelaki', 'bomba', 'emak', 'sejuk', 'masalah', 'beli_2',
-        'panas_2', 'perempuan', 'bagaimana'
+        'anak_lelaki', 'apa_khabar', 'assalamualaikum', 'bagaimana', 'baik',
+        'beli', 'beli_2', 'bomba', 'buat', 'emak', 'emak_saudara', 'hi', 'jahat',
+        'jangan', 'kereta', 'lelaki', 'lemak', 'main', 'marah', 'masalah', 'nasi',
+        'nasi_lemak', 'panas', 'panas_2', 'pandai_2', 'perempuan', 'pinjam', 'pukul',
+        'ribut', 'sejuk'
     ]
 # {
 #   "anak_lelaki": 0,
