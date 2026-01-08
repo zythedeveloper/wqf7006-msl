@@ -1,5 +1,6 @@
 import argparse
 import os
+import warnings
 from multiprocessing import Pool
 
 import cv2
@@ -88,8 +89,13 @@ def _process_video_first(video_path, output_path, num_frames):
 
     cap.release()
 
-    if len(keypoints_list) == 0:
-        raise ValueError(f"No keypoints found in {video_path}")
+    if len(keypoints_list) == 0 and frame_idx > 0:
+        warnings.warn(f"No keypoints found in {video_path}, no npy file will be saved.")
+        return 0
+
+    elif len(keypoints_list) == 0 and frame_idx == 0:
+        warnings.warn(f"Invalid video: {video_path}, no npy file will be saved.")
+        return 0
 
     # Stack all frames into a single array: (num_frames, feature_dim)
     keypoints_array = np.stack(keypoints_list)
@@ -132,8 +138,13 @@ def _process_video_uniform(video_path, output_path, num_frames):
 
     cap.release()
 
-    if len(keypoints_list) == 0:
-        raise ValueError(f"No keypoints found in {video_path}")
+    if len(keypoints_list) == 0 and frame_idx > 0:
+        warnings.warn(f"No keypoints found in {video_path}, no npy file will be saved.")
+        return 0
+
+    elif len(keypoints_list) == 0 and frame_idx == 0:
+        warnings.warn(f"Invalid video: {video_path}, no npy file will be saved.")
+        return 0
 
     # Uniform sampling AFTER extraction
     if len(keypoints_list) >= num_frames:
