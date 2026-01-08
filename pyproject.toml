@@ -35,6 +35,7 @@ cu130 = ["torch>=2.9.0", "torchvision>=0.24.0"]
 msl = "wqf7006_msl:main"
 msl-extract-feats = "wqf7006_msl.scripts.extract_features:main"
 msl-build-tensors = "wqf7006_msl.scripts.build_tensors:main"
+msl-app = "wqf7006_msl:run_streamlit"
 
 [build-system]
 requires = ["uv_build>=0.9.8,<0.10.0"]
