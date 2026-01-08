@@ -6,7 +6,7 @@ Unzip the downloaded `BIM Dataset V3.zip` file so that the directory structure l
 wqf7006-msl/
 └── data/
     └── BIM Dataset V3/
-        ├── video/
+        ├── video/                          # Raw video files (organized by gloss/sign)
         │   ├── abang/
         │   │   ├── abang_1_1_1.mp4
         │   │   ├── ...
@@ -15,44 +15,32 @@ wqf7006-msl/
         │   ├── ...
         │   └── ambil/
         │
-        ├── features/ (we only save top 30 glosses with most videos)
-        │   ├── first_30/ (first 30 frames of each video)
+        ├── features/                       # Extracted MediaPipe features
+        │   ├── first_30/                   # First 30 frames with hand landmarks
         │   │   ├── abang/
-        │   │   │   ├── abang_1_1_1.mp4/
-        │   │   │   │   ├── 00.npy (258-dim landmark features)
-        │   │   │   │   ├── ...
-        │   │   │   │   └── 29.npy
-        │   │   │   └── abang_4_6_3.mp4/
+        │   │   │   ├── abang_1_1_1.npy    # Shape: (30, 258) - all frames in one file
+        │   │   │   ├── abang_4_6_3.npy    # Shape: (22, 258) - might be less than 30 frames, padding is not done
+        │   │   │   └── ...
         │   │   ├── ada/
-        │   │   ├── ...
-        │   │   └── ambil/
+        │   │   └── ...
         │   │
-        │   └── uniform_30/ (uniformly sampled 30 frames from each video)
+        │   └── uniform_30/                # Uniformly sampled 30 frames
         │       ├── abang/
-        │       │   ├── abang_1_1_1.mp4/
-        │       │   │   ├── 00.npy
-        │       │   │   ├── ...
-        │       │   │   └── 29.npy
-        │       │   └── abang_4_6_3.mp4/
-        │       ├── ada/
-        │       └── ambil/
+        │       │   ├── abang_1_1_1.npy    # Shape: (30, 258) - all frames in one file
+        │       │   ├── abang_4_6_3.npy    # Shape: (22, 258) - might be less than 30 frames, padding is not done
+        │       │   └── ...
+        │       └── ...
         │
-        └── tensors/
+        └── tensors/                        # Processed tensors for ML training
             ├── first_30/
-            │   ├── X.npy
-            │   ├── y.npy
-            │   ├── X_train.npy
-            │   ├── y_train.npy
-            │   ├── X_test.npy
-            │   ├── y_test.npy
-            │   └── label_map.json
+            │   ├── X.npy                   # Full dataset features (N, T, D), T is the number of specified frames (30 by default), padding is done here
+            │   ├── y.npy                   # Full dataset labels (N,)
+            │   ├── X_train.npy             # Training features
+            │   ├── y_train.npy             # Training labels
+            │   ├── X_test.npy              # Test features
+            │   ├── y_test.npy              # Test labels
+            │   └── label_map.json          # Gloss to label index mapping
             │
             └── uniform_30/
-                ├── X.npy
-                ├── y.npy
-                ├── X_train.npy
-                ├── y_train.npy
-                ├── X_test.npy
-                ├── y_test.npy
-                └── label_map.json
+                └── [same structure as first_30/]
 ```

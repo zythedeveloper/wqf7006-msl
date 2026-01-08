@@ -9,15 +9,12 @@ from tqdm import tqdm
 
 def build_xy(features_root: Path, num_frames: int):
     """
-    Build X and y from extracted feature folders.
+    Build X and y from extracted feature files.
 
     Expected structure:
     features_root/
         gloss/
-            video.mp4/
-                00.npy
-                01.npy
-                ...
+            video_name.npy  (shape: (num_frames, feature_dim))
 
     Returns
     -------
@@ -40,24 +37,25 @@ def build_xy(features_root: Path, num_frames: int):
     for gloss in tqdm(glosses, desc="Glosses"):
         gloss_dir = features_root / gloss
 
-        for video_dir in sorted(gloss_dir.iterdir()):
-            if not video_dir.is_dir():
-                continue
+        # Load all .npy files (each file is a video clip)
+        npy_files = sorted(gloss_dir.glob("*.npy"))
 
-            npy_files = sorted(video_dir.glob("*.npy"))
-            if len(npy_files) == 0:
-                continue
+        for npy_file in npy_files:
+            # Load the video clip features (shape: (num_frames, feature_dim))
+            frames = np.load(npy_file)
 
-            # Load frame features
-            frames = [np.load(f) for f in npy_files]
-            D = frames[0].shape[0]
+            # Ensure correct shape
+            if frames.ndim == 1:
+                # Single frame, reshape to (1, D)
+                frames = frames.reshape(1, -1)
 
             # Pad or trim to fixed length
-            if len(frames) < num_frames:
-                pad = np.zeros((num_frames - len(frames), D))
+            if frames.shape[0] < num_frames:
+                D = frames.shape[1]
+                pad = np.zeros((num_frames - frames.shape[0], D))
                 frames = np.vstack([frames, pad])
-            else:
-                frames = np.stack(frames[:num_frames])
+            elif frames.shape[0] > num_frames:
+                frames = frames[:num_frames]
 
             X.append(frames)
             y.append(label_map[gloss])
@@ -91,7 +89,6 @@ def stratified_split_and_save(
     test_size: float,
     seed: int,
 ):
-
     print("\nPerforming stratified train/test split...")
     print(f"Test size: {test_size}, Seed: {seed}")
 

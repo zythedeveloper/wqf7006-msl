@@ -50,27 +50,28 @@ def extract_keypoints(results):
 # -------------------------
 
 
-def _already_extracted(output_dir, num_frames):
-    if not os.path.isdir(output_dir):
-        return False
-    return len([f for f in os.listdir(output_dir) if f.endswith(".npy")]) >= num_frames
+def _already_extracted(output_path):
+    """Check if the output file already exists."""
+    return os.path.isfile(output_path)
 
 
-def _process_video_first(video_path, output_dir, num_frames):
-    if _already_extracted(output_dir, num_frames):
-        return num_frames
+def _process_video_first(video_path, output_path, num_frames):
+    if _already_extracted(output_path):
+        # Load existing file to get the number of frames
+        existing = np.load(output_path)
+        return existing.shape[0]
 
-    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     cap = cv2.VideoCapture(video_path)
-    saved = 0
+    keypoints_list = []
     frame_idx = 0
 
     with mp_holistic.Holistic(
         min_detection_confidence=0.5,
         min_tracking_confidence=0.5,
     ) as holistic:
-        while cap.isOpened() and saved < num_frames:
+        while cap.isOpened() and len(keypoints_list) < num_frames:
             ret, frame = cap.read()
             if not ret:
                 break
@@ -81,25 +82,33 @@ def _process_video_first(video_path, output_dir, num_frames):
 
             if results.left_hand_landmarks or results.right_hand_landmarks:
                 keypoints = extract_keypoints(results)
-                np.save(
-                    os.path.join(output_dir, f"{frame_idx:02d}.npy"),
-                    keypoints,
-                )
-                saved += 1
+                keypoints_list.append(keypoints)
 
             frame_idx += 1
 
     cap.release()
-    return saved
+
+    if len(keypoints_list) == 0:
+        raise ValueError(f"No keypoints found in {video_path}")
+
+    # Stack all frames into a single array: (num_frames, feature_dim)
+    keypoints_array = np.stack(keypoints_list)
+
+    # Save as single file
+    np.save(output_path, keypoints_array)
+    return keypoints_array.shape[0]
 
 
-def _process_video_uniform(video_path, output_dir, num_frames):
-    if _already_extracted(output_dir, num_frames):
-        return num_frames
-    os.makedirs(output_dir, exist_ok=True)
+def _process_video_uniform(video_path, output_path, num_frames):
+    if _already_extracted(output_path):
+        # Load existing file to get the number of frames
+        existing = np.load(output_path)
+        return existing.shape[0]
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     cap = cv2.VideoCapture(video_path)
-    keypoints_list = []  # (frame_idx, keypoints)
+    keypoints_list = []
     frame_idx = 0
 
     with mp_holistic.Holistic(
@@ -117,28 +126,33 @@ def _process_video_uniform(video_path, output_dir, num_frames):
 
             if results.left_hand_landmarks or results.right_hand_landmarks:
                 keypoints = extract_keypoints(results)
-                keypoints_list.append((frame_idx, keypoints))
+                keypoints_list.append(keypoints)
 
             frame_idx += 1
 
     cap.release()
 
-    # uniform sampling AFTER extraction
+    if len(keypoints_list) == 0:
+        raise ValueError(f"No keypoints found in {video_path}")
+
+    # Uniform sampling AFTER extraction
     if len(keypoints_list) >= num_frames:
         idx = np.linspace(0, len(keypoints_list) - 1, num_frames).astype(int)
         keypoints_list = [keypoints_list[i] for i in idx]
 
-    for frame_idx, kp in keypoints_list:
-        np.save(os.path.join(output_dir, f"{frame_idx:02d}.npy"), kp)
+    # Stack all frames into a single array: (num_frames, feature_dim)
+    keypoints_array = np.stack(keypoints_list)
 
-    return len(keypoints_list)
+    # Save as single file
+    np.save(output_path, keypoints_array)
+    return keypoints_array.shape[0]
 
 
-def process_video(video_path, output_dir, sampling, num_frames):
+def process_video(video_path, output_path, sampling, num_frames):
     if sampling == "first":
-        return _process_video_first(video_path, output_dir, num_frames)
+        return _process_video_first(video_path, output_path, num_frames)
     elif sampling == "uniform":
-        return _process_video_uniform(video_path, output_dir, num_frames)
+        return _process_video_uniform(video_path, output_path, num_frames)
     else:
         raise ValueError(f"Unknown sampling: {sampling}")
 
@@ -152,8 +166,8 @@ def _worker_star(task):
     """
     Top-level helper for Windows multiprocessing.
     """
-    video_path, output_dir, sampling, num_frames = task
-    return process_video(video_path, output_dir, sampling, num_frames)
+    video_path, output_path, sampling, num_frames = task
+    return process_video(video_path, output_path, sampling, num_frames)
 
 
 # -------------------------
@@ -210,15 +224,21 @@ def main():
 
     for gloss in glosses_to_process:
         gloss_dir = os.path.join(args.video_root, gloss)
+        output_gloss_dir = os.path.join(output_root, gloss)
+        os.makedirs(output_gloss_dir, exist_ok=True)
 
         for video in os.listdir(gloss_dir):
             if not video.endswith(".mp4"):
                 continue
 
+            # Change output from directory to single .npy file
+            video_name = os.path.splitext(video)[0]  # Remove .mp4 extension
+            output_path = os.path.join(output_gloss_dir, f"{video_name}.npy")
+
             tasks.append(
                 (
                     os.path.join(gloss_dir, video),
-                    os.path.join(output_root, gloss, video),
+                    output_path,
                     args.sampling,
                     args.num_frames,
                 )
