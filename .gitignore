@@ -19,3 +19,6 @@ weights/*
 !weights/.gitkeep
 !weights/*_best.pth
 label_map.json
+
+*.mov
+*.pptx
