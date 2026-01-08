@@ -1,6 +1,4 @@
-Download the dataset from [here](https://drive.google.com/drive/folders/1mt36VY2LZRMjpT89__bh_PGsJE3q4RRN?usp=drive_link) and place the contents in the `data/` directory.
-
-Unzip the downloaded `BIM Dataset V3.zip` file so that the directory structure looks like this:
+Get the dataset from [huggingface](https://huggingface.co/datasets/jherng/malaysian-sign-language).
 
 ```bash
 wqf7006-msl/
