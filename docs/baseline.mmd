@@ -1,0 +1,22 @@
+graph TD
+    In([Input Sequence: T x 258]) -- " (T, 258) " --> LSTM_Stack[3-Layer Stacked LSTM: 128 units]
+    
+    subgraph Extraction [Temporal Aggregation]
+        direction TB
+        Last[Select Last Hidden State]
+    end
+    
+    LSTM_Stack -- " Full Sequence: (T, 128) " --> Last
+    
+    subgraph MLP_Block [Dense Classifier]
+        direction TB
+        MLP[5-Layer MLP with ReLU: 64-128-64-32-32]
+    end
+
+    Last -- " State Vector: (128,) " --> MLP_Block
+    MLP_Block -- " (32,) " --> Out([Output: 30 Classes])
+
+    style In fill:#f9f,stroke:#333
+    style Extraction fill:#f5f5f5,stroke:#666,stroke-dasharray: 5 5
+    style MLP_Block fill:#e1f5fe,stroke:#01579b
+    style Out fill:#bfb,stroke:#333

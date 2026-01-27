@@ -1,0 +1,26 @@
+graph TD
+    In([Input Sequence: T x 258]) -- " (T, 258) " --> Bi[2-Layer BiLSTM: 128 units x 2]
+    
+    subgraph Attn [Temporal Attention]
+        direction TB
+        Score[Linear: 256 -> 1] --> Soft[Softmax over T]
+        Soft -- " Weights α: (T, 1) " --> Weight[Weighted Summation]
+    end
+
+    Bi -- " Hidden States H: (T, 256) " --> Score
+    Bi -- " Hidden States H: (T, 256) " --> Weight
+    
+    
+    
+    subgraph FC_Block [Feature Mapping]
+        FC1[Linear: 256 -> 128]
+        Relu[ReLU + Dropout]
+    end
+
+    Weight -- " Context Vector: (256,) " --> FC_Block
+    FC_Block -- " (128,) " --> Out([Output: 30 Classes])
+
+    style In fill:#f9f,stroke:#333
+    style Attn fill:#fff4dd,stroke:#d4a017
+    style FC_Block fill:#eee,stroke:#333
+    style Out fill:#bfb,stroke:#333

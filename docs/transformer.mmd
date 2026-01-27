@@ -1,0 +1,20 @@
+graph TD
+    In([Input Sequence: T x 258]) -- " (T, 258) " --> Proj[Linear Embedding: 128]
+    
+    subgraph EncBlock [Transformer Enc Block x2]
+        direction TB
+        MHA[4-Head Self-Attention; FFN: 256]
+    end
+
+    Proj -- " (T, 128) " --> EncBlock
+    
+    GAP[Global Average Pooling]
+    
+    EncBlock -- " (T, 128)" --> GAP
+    FC[Linear: 128 -> 30]
+    GAP -- " (128,) " --> FC
+    FC --> Out([Output: 30 Classes])
+
+    style In fill:#f9f,stroke:#333
+    style EncBlock fill:#dfb,stroke:#333
+    style Out fill:#bfb,stroke:#333
