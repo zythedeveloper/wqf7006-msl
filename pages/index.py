@@ -12,7 +12,6 @@ background_gif = os.path.join(static_dir, 'animation.gif')
 with open(background_gif, "rb") as f:
     encoded_gif = base64.b64encode(f.read()).decode()
 
-
 st.markdown(
     f"""
     <style>
@@ -26,11 +25,13 @@ st.markdown(
     .title {{
         font-size: 5em !important;
         font-family: 'Courier New', monospace !important;
+        color: CanvasText !important;
     }}
 
     .subtitle {{
         font-size: 1.5rem !important;
         font-family: 'Courier New', monospace !important;
+        color: CanvasText !important;
         margin-bottom: 2rem;
     }}
 
