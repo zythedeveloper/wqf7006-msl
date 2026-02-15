@@ -26,7 +26,7 @@ if "gestures" not in st.session_state:
         'nasi_lemak', 'panas', 'panas_2', 'pandai_2', 'perempuan', 'pinjam', 'pukul',
         'ribut', 'sejuk'
     ]
-# {
+    
 #   "anak_lelaki": 0,
 #   "apa_khabar": 1,
 #   "assalamualaikum": 2,
