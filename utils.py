@@ -253,8 +253,9 @@ class VideoProcessor:
         (text_width, text_height), baseline = cv2.getTextSize(display_text, font, font_scale, thickness)
         
         # draw semi-transparent background box
-        padding = 20
-        box_coords = ((0, height - 80), (width, height))
+        box_height = 40
+        box_top = height - box_height
+        box_coords = ((0, height - box_height), (width, height))
         overlay = image.copy()
         cv2.rectangle(overlay, box_coords[0], box_coords[1], (0, 0, 0), -1)
 
@@ -263,7 +264,7 @@ class VideoProcessor:
         
         # center the text
         text_x = (width // 2) - (text_width // 2)
-        text_y = height - 35
+        text_y = box_top + (box_height // 2) + (text_height // 2)
         
         # shadow for text
         cv2.putText(image, display_text, (text_x + 2, text_y + 2), font, font_scale, (0, 0, 0), thickness, cv2.LINE_AA)
